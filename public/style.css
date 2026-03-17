@@ -1,0 +1,139 @@
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Body */
+body {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* Container */
+.container {
+    background: #ffffff;
+    padding: 35px 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    width: 420px;
+    animation: fadeIn 0.6s ease-in-out;
+}
+
+/* Headings */
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+h2 {
+    margin-top: 25px;
+    margin-bottom: 10px;
+    color: #444;
+}
+
+/* Form */
+form div {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Labels */
+label {
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #555;
+}
+
+/* Inputs */
+input[type="url"],
+input[type="text"] {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+/* Input focus effect */
+input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 5px rgba(102, 126, 234, 0.5);
+}
+
+/* Button */
+button {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border: none;
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+/* Button hover */
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* URL list */
+#shortened-urls {
+    list-style: none;
+    margin-top: 10px;
+    max-height: 200px;   /* limit height */
+    overflow-y: scroll;
+    overflow-x:hidden;    /* enable vertical scroll */
+    padding-right: 5px;  /* space for scrollbar */
+    
+}
+
+/* Each item */
+#shortened-urls li {
+    background: #f8f9ff;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+    transition: transform 0.2s ease;
+}
+
+/* Hover effect */
+#shortened-urls li:hover {
+    transform: scale(1.02);
+}
+
+/* Links */
+#shortened-urls a {
+    color: #667eea;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+#shortened-urls a:hover {
+    text-decoration: underline;
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
