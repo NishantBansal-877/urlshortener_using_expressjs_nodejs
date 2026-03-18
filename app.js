@@ -1,5 +1,5 @@
 
-import express from "express";
+import express, { urlencoded } from "express";
 import router from "./routes/shortener.route.js";
 
 
@@ -8,7 +8,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 
-
+app.use(urlencoded({extended:true}));
 app.use(express.static("public"));
 
 // setting template engine

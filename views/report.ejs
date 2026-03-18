@@ -4,12 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="stylesheet" href="/style.css">
 </head>
 <body>
+  
+ <%- include("header") %>
+
+    <section class="report-section">
     <h1>Student report card</h1>
- 
-     <p>Name: <%= student.name %></p>
-     <p>Grade: <%= student.grade %></p>
-     <p>Fovrite Subject: <%= student.favoriteSubject %></p>
+<ul>
+
+     <% students.forEach(function(student){ %>
+        <li>
+    <p>Name: <%= student.name %></p>
+    <p>Grade: <%= student.grade %></p>
+    <p>Favorite Subject: <%= student.favoriteSubject %></p>
+    </li>
+<% }) %>
+</ul>
+
+</section>
 </body>
 </html>
