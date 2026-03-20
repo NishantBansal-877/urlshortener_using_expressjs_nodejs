@@ -1,14 +1,14 @@
 import crypto from "crypto";
-import { loadLinks,saveLinks,getLinkByShortCode } from "../models/shortener.model.js";
+import { loadLinks,saveLinks,getLinkByShortCode ,checkLinks} from "../models/shortener.model.js";
 export const postURLShortener =async(req,res)=>{
     try {
       
          const {url,shortCode} = req.body;
          const finalShortCode = shortCode || crypto.randomBytes(4).toString("hex");
 
-         const links = await loadLinks();
-        
-          if(links[finalShortCode]){
+         const links = await checkLinks(finalShortCode);
+        console.log("hy",links);
+          if(links){
             return res.status(400).send("Short code already exists. Please choose another.")
           }
 
@@ -19,7 +19,7 @@ export const postURLShortener =async(req,res)=>{
         await saveLinks({url,shortCode});
            return res.redirect("/")
     } catch (error) {
-         return res.status(500).send("INernal server error")
+         return res.status(500).send("Inerrnal server error")
 
     }
 };

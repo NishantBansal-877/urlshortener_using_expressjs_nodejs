@@ -1,7 +1,4 @@
-// import { MongoClient } from "mongodb";
-// import { env } from "./env.js";
 
-// export const dbClient = new MongoClient(env.MONGODB_URI);
 
 import mysql from "mysql2/promise"
 import { env } from "./env.js"
