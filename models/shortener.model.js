@@ -26,20 +26,16 @@
 // };
 
 
-import { dbClient } from "../config/db-client.js";
-import { env } from "../config/env.js";
-
-const db = dbClient.db(env.MONGODB_DATABASE_NAME);
-const shortenerCollection = db.collection("shorteners");
+import { URL } from "../config/mongoose-client.js";
 
 export const loadLinks = async()=>{
-    return shortenerCollection.find().toArray();
+    return await URL.find();
 }
 
 export const saveLinks = async(link)=>{
-    return shortenerCollection.insertOne(link);
+    return URL.insertOne(link);
 }
 
 export const getLinkByShortCode = async(shortCode)=>{
-return await shortenerCollection.findOne({shortCode:shortCode})
+return await URL.findOne({shortCode:shortCode})
 }

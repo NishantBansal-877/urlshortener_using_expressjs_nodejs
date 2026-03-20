@@ -26,8 +26,7 @@ export const postURLShortener =async(req,res)=>{
 
 export const getShortenerPage =async (req,res)=>{
     try {
-        const links = await loadLinks();
-
+        const links = await loadLinks();  
 
         return res.render("index",{links,host: req.host})
     } catch (error) {

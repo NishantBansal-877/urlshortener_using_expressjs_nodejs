@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { email, string } from "zod";
 
 
 //to connect mongodb server and database
