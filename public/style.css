@@ -9,7 +9,7 @@
 /* Body */
 body {
     background: linear-gradient(135deg, #667eea, #764ba2);
-    /* display: flex; */
+    display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
@@ -108,11 +108,13 @@ button:hover {
     border-radius: 8px;
     border-left: 4px solid #667eea;
     transition: transform 0.2s ease;
+    width: 100%;
 }
 
 /* Hover effect */
 #shortened-urls li:hover {
     transform: scale(1.02);
+    z-index: 22;
 }
 
 /* Links */
