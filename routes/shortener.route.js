@@ -12,4 +12,4 @@ router.post("/",postURLShortener);
 
 router.get("/:shortCode",redirectToShortLiknk);
 
-export default router;
+export const shortenerRoutes  = router;

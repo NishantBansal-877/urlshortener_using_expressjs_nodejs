@@ -1,148 +1,32 @@
-/* Reset */
+/* 🌐 Global Reset */
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-/* Body */
+/* 🌈 Body Styling */
 body {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+  color: #333;
 }
 
-/* Container */
+/* 📦 Container */
 .container {
-    background: #ffffff;
-    padding: 35px 40px;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    width: 420px;
-    animation: fadeIn 0.6s ease-in-out;
+  width: 90%;
+  max-width: 900px;
+  margin: 40px auto;
+  background: #fff;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Headings */
-h1 {
-    text-align: center;
-    margin-bottom: 20px;
-    color: #333;
-}
-
-h2 {
-    margin-top: 25px;
-    margin-bottom: 10px;
-    color: #444;
-}
-
-/* Form */
-form div {
-    margin-bottom: 15px;
-    display: flex;
-    flex-direction: column;
-}
-
-/* Labels */
-label {
-    margin-bottom: 6px;
-    font-weight: 600;
-    color: #555;
-}
-
-/* Inputs */
-input[type="url"],
-input[type="text"] {
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 14px;
-    transition: all 0.3s ease;
-}
-
-/* Input focus effect */
-input:focus {
-    outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 5px rgba(102, 126, 234, 0.5);
-}
-
-/* Button */
-button {
-    width: 100%;
-    padding: 12px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    border: none;
-    color: #fff;
-    font-size: 16px;
-    font-weight: bold;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-/* Button hover */
-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-}
-
-/* URL list */
-#shortened-urls {
-    list-style: none;
-    margin-top: 10px;
-    max-height: 200px;   /* limit height */
-    overflow-y: scroll;
-    overflow-x:hidden;    /* enable vertical scroll */
-    padding-right: 5px;  /* space for scrollbar */
-    
-}
-
-/* Each item */
-#shortened-urls li {
-    background: #f8f9ff;
-    padding: 12px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    border-left: 4px solid #667eea;
-    transition: transform 0.2s ease;
-    width: 100%;
-}
-
-/* Hover effect */
-#shortened-urls li:hover {
-    transform: scale(1.02);
-    z-index: 22;
-}
-
-/* Links */
-#shortened-urls a {
-    color: #667eea;
-    font-weight: bold;
-    text-decoration: none;
-}
-
-#shortened-urls a:hover {
-    text-decoration: underline;
-}
-
-/* Animation */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
+/* 🧭 Navbar */
 nav {
-  background-color: #333;
-  padding: 12px;
+  background: #007bff;
+  padding: 15px;
   text-align: center;
 }
 
@@ -157,34 +41,123 @@ nav a:hover {
   text-decoration: underline;
 }
 
-/* Common heading */
+/* 📝 Headings */
 h1 {
   text-align: center;
-  margin: 20px 0;
+  margin-bottom: 20px;
 }
 
-/* Report card styling */
-ul {
+h2 {
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+/* 📋 Forms */
+form {
+  margin-top: 20px;
+}
+
+form div {
+  margin-bottom: 15px;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+/* 🔘 Buttons */
+button {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: 0.3s;
+}
+
+/* Different button styles */
+button[type="submit"] {
+  background: #007bff;
+  color: white;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+/* 🟢 Register button override */
+form[action="/register"] button {
+  background: #28a745;
+}
+
+/* 🔗 Links */
+a {
+  color: #007bff;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* 🔗 Shortened URLs list */
+#shortened-urls {
   list-style: none;
-  padding: 0;
+  margin-top: 20px;
 }
 
-li {
-  background: #f4f4f4;
-  margin: 15px auto;
-  padding: 15px;
-  width: 60%;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+#shortened-urls li {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
 }
 
-/* Text */
-p {
-  margin: 5px 0;
+#shortened-urls a {
+  font-weight: bold;
 }
 
-.report-section ul{
-    display: flex;
-    gap: 10px;
+/* 📌 Login/Register center alignment */
+body > form,
+body > .container {
+  max-width: 400px;
+  margin: 80px auto;
+}
 
+/* 📎 Footer */
+footer {
+  margin-top: 40px;
+  background: #222;
+  color: #fff;
+  padding: 20px 0;
+}
+
+footer .container {
+  background: transparent;
+  box-shadow: none;
+  text-align: center;
+}
+
+footer a {
+  color: #ddd;
+  margin: 0 5px;
+}
+
+footer a:hover {
+  color: #fff;
+}
+
+/* 📱 Responsive */
+@media (max-width: 600px) {
+  .container {
+    padding: 15px;
+  }
+
+  nav a {
+    display: block;
+    margin: 5px 0;
+  }
 }
