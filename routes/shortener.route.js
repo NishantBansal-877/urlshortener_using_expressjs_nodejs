@@ -1,15 +1,23 @@
-
-
-import {Router} from "express";
-import { postURLShortener ,getShortenerPage ,redirectToShortLiknk} from "../controllers/postshortener.controller.js";
+import { Router } from "express";
+import {
+  postURLShortener,
+  getShortenerPage,
+  redirectToShortLiknk,
+  getShortenerEditPage,
+  updateShortCode,
+  deleteShortCode,
+} from "../controllers/postshortener.controller.js";
 
 const router = Router();
 
+router.get("/", getShortenerPage);
 
-router.get("/",getShortenerPage);
+router.post("/", postURLShortener);
 
-router.post("/",postURLShortener);
+router.get("/:shortCode", redirectToShortLiknk);
 
-router.get("/:shortCode",redirectToShortLiknk);
+router.route("/edit/:id").get(getShortenerEditPage).post(updateShortCode);
 
-export const shortenerRoutes  = router;
+router.route("/delete/:id").post(deleteShortCode);
+
+export const shortenerRoutes = router;

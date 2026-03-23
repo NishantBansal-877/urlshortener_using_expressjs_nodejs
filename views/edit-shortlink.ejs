@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="/style.css" />
     <!-- ZMDI Material Design Iconic Font CDN -->
     <link
       rel="stylesheet"
@@ -35,7 +35,12 @@
 
             <div class="shortener-form">
               <h1 class="form-title">URL Shortener</h1>
-              <form action="/" method="post" class="url-form" id="url-form">
+              <form
+                action="/edit/<%= id  %>"
+                method="post"
+                class="url-form"
+                id="url-form"
+              >
                 <div class="form-group">
                   <label for="url">
                     <i class="zmdi zmdi-link"></i>
@@ -45,6 +50,7 @@
                     name="url"
                     id="url"
                     placeholder="Enter URL"
+                    value="<%= url  %>"
                     required
                   />
                 </div>
@@ -56,7 +62,8 @@
                     type="text"
                     name="shortCode"
                     id="shortCode"
-                    placeholder="Enter custom short code"
+                    value="<%= shortCode  %>"
+                    required
                   />
                 </div>
 
@@ -66,69 +73,21 @@
                 <% }); %> <% } %>
 
                 <div class="form-group form-button">
-                  <input
+                  <button
                     type="submit"
                     name="shorten"
                     id="shorten"
                     class="form-submit"
-                    value="Shorten"
-                  />
+                  
+                   > Update </button>
                 </div>
               </form>
-            </div>
-
-            <div class="shortened-urls">
-              <h2 class="section-title">Shortened URLs</h2>
-              <% if(links && links.length > 0) { %>
-              <ul class="url-list">
-                <% links.map(({shortCode, url, id}) => { %> <% const
-                truncatedUrl = url.length >= 30 ? `${url.slice(0,30)}...` : url
-                %>
-                <li class="url-item">
-                  <div class="url-info">
-                    <a
-                      href="/<%= shortCode %>"
-                      class="short-url"
-                      target="_blank"
-                    >
-                      <i class="zmdi zmdi-link"></i>
-                      <%= host %>/<%= shortCode %>
-                    </a>
-                    <span class="original-url"><%= truncatedUrl %></span>
-                  </div>
-                  <div class="url-actions">
-                    <button
-                      class="copy-btn"
-                      data-url="<%= host %>/<%= shortCode %>"
-                    >
-                      <i class="zmdi zmdi-copy"></i>
-                    </button>
-
-                    <button class="copy-btn edit-btn">
-                      <a href="/edit/<%= id %>">
-                        <i class="zmdi zmdi-edit"></i>
-                      </a>
-                    </button>
-
-                    <form action="/delete/<%= id %>" method="post">
-                      <button class="copy-btn edit-btn">
-                        <i class="zmdi zmdi-delete"></i>
-                      </button>
-                    </form>
-                  </div>
-                </li>
-                <% }) %>
-              </ul>
-              <% } else { %>
-              <p class="empty-list">
-                No shortened URLs yet. Create your first one above!
-              </p>
-              <% } %>
             </div>
           </div>
         </div>
       </section>
     </div>
 
+    <%- include('./partials/footer.ejs') %>
   </body>
 </html>
