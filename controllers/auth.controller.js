@@ -40,6 +40,7 @@ import {
 import { OAUTH_EXCHANGE_EXPIRY } from "../config/constants.js";
 import { google } from "../lib/oauth/google.js";
 import { github } from "../lib/oauth/github.js";
+import { getHtmlFromMjmlTemplate } from "../lib/get-html-from-mjml-template.js";
 
 export const getRegisterPage = (req, res) => {
   if (req.user) return res.redirect("/");
@@ -267,6 +268,7 @@ export const postChangePassword = async (req, res) => {
 };
 
 export const getResetPasswordPage = async (req, res) => {
+  console.log(req.flash("formSubmitted")[0]);
   return res.render("auth/forgot-password", {
     formSubmitted: req.flash("formSubmitted")[0],
     errors: req.flash("errors"),
@@ -392,7 +394,6 @@ export const getGoogleLoginCallback = async (req, res) => {
   try {
     tokens = await google.validateAuthorizationCode(code, codeVerifier);
   } catch (error) {
-    console.log("err", error);
     req.flash(
       "errors",
       "Couldn't login with Google becuse of invalid login attempt. Please try again!",
@@ -440,11 +441,125 @@ export const getGithubLoginPage = async (req, res) => {
     httpOnly: true,
     secure: true,
     maxAge: OAUTH_EXCHANGE_EXPIRY,
-    sameSite: "lax",
-    //this is such that when google redirects to our website cookies are maintained
+    sameSite: "lax", // this is such that when google redirects to our website, cookies are maintained
   };
 
   res.cookie("github_oauth_state", state, cookieConfig);
 
   res.redirect(url.toString());
+};
+
+export const getGithubLoginCallback = async (req, res) => {
+  const { code, state } = req.query;
+  const { github_oauth_state: storedState } = req.cookies;
+
+  function handleFailedLogin() {
+    req.flash(
+      "errors",
+      "Couldn't login with GitHub because of invalid login attempt. Please try again!",
+    );
+    return res.redirect("/login");
+  }
+
+  if (!code || !state || !storedState || state !== storedState) {
+    return handleFailedLogin();
+  }
+
+  let tokens;
+  try {
+    tokens = await github.validateAuthorizationCode(code);
+  } catch {
+    return handleFailedLogin();
+  }
+
+  const githubUserResponse = await fetch("https://api.github.com/user", {
+    headers: {
+      Authorization: `Bearer ${tokens.accessToken()}`,
+    },
+  });
+  if (!githubUserResponse.ok) return handleFailedLogin();
+  const githubUser = await githubUserResponse.json();
+  const { id: githubUserId, name } = githubUser;
+
+  const githubEmailResponse = await fetch(
+    "https://api.github.com/user/emails",
+    {
+      headers: {
+        Authorization: `Bearer ${tokens.accessToken()}`,
+      },
+    },
+  );
+  if (!githubEmailResponse.ok) return handleFailedLogin();
+
+  const emails = await githubEmailResponse.json();
+  const email = emails.filter((e) => e.primary)[0].email; // In GitHub we can have multiple emails, but we only want primary email
+  if (!email) return handleFailedLogin();
+
+  // there are few things that we should do
+  //! Condition 1: User already exists with github's oauth linked
+  //! Condition 2: User already exists with the same email but google's oauth isn't linked
+  //! Condition 3: User doesn't exist.
+
+  let user = await getuserWithOauthId({
+    provider: "github",
+    email,
+  });
+
+  if (user && !user.providerAccountId) {
+    await linkUserWithOauth({
+      userId: user.id,
+      provider: "github",
+      providerAccountId: githubUserId,
+    });
+  }
+
+  if (!user) {
+    user = await createUserWithOauth({
+      name,
+      email,
+      provider: "github",
+      providerAccountId: githubUserId,
+    });
+  }
+
+  await authenticateUser({ req, res, user, name, email });
+
+  res.redirect("/");
+};
+
+//getSetPasswordPage
+export const getSetPasswordPage = async (req, res) => {
+  if (!req.user) return res.redirect("/");
+
+  return res.render("auth/set-password", {
+    errors: req.flash("errors"),
+  });
+};
+
+//postSetPassword
+export const postSetPassword = async (req, res) => {
+  if (!req.user) return res.redirect("/");
+
+  const { data, error } = setPasswordSchema.safeParse(req.body);
+
+  if (error) {
+    const errorMessages = error.errors.map((err) => err.message);
+    req.flash("errors", errorMessages);
+    return res.redirect("/set-password");
+  }
+
+  const { newPassword } = data;
+
+  const user = await findUserById(req.user.id);
+  if (user.password) {
+    req.flash(
+      "errors",
+      "You already have your Password, Instead Change your password",
+    );
+    return res.redirect("/set-password");
+  }
+
+  await updateUserPassword({ userId: req.user.id, newPassword });
+
+  return res.redirect("/profile");
 };

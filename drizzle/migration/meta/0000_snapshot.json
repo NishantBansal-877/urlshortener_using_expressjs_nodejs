@@ -1,9 +1,158 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "62a3a9cc-f70b-4692-9344-0ee10000f04c",
+  "id": "b36b61b1-b526-4204-9b06-bf82dc940dcf",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
+    "oauth_accounts": {
+      "name": "oauth_accounts",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "provider": {
+          "name": "provider",
+          "type": "enum('google','github')",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "provider_account_id": {
+          "name": "provider_account_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "oauth_accounts_user_id_users_id_fk": {
+          "name": "oauth_accounts_user_id_users_id_fk",
+          "tableFrom": "oauth_accounts",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "oauth_accounts_id": {
+          "name": "oauth_accounts_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {
+        "oauth_accounts_provider_account_id_unique": {
+          "name": "oauth_accounts_provider_account_id_unique",
+          "columns": [
+            "provider_account_id"
+          ]
+        }
+      },
+      "checkConstraint": {}
+    },
+    "password_reset_tokens": {
+      "name": "password_reset_tokens",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "token_hash": {
+          "name": "token_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(CURRENT_TIMESTAMP + INTERVAL 1 HOUR)"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "password_reset_tokens_user_id_users_id_fk": {
+          "name": "password_reset_tokens_user_id_users_id_fk",
+          "tableFrom": "password_reset_tokens",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "password_reset_tokens_id": {
+          "name": "password_reset_tokens_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {
+        "password_reset_tokens_user_id_unique": {
+          "name": "password_reset_tokens_user_id_unique",
+          "columns": [
+            "user_id"
+          ]
+        }
+      },
+      "checkConstraint": {}
+    },
     "sessions": {
       "name": "sessions",
       "columns": {
@@ -88,8 +237,8 @@
       "uniqueConstraints": {},
       "checkConstraint": {}
     },
-    "short_link": {
-      "name": "short_link",
+    "shortlink": {
+      "name": "shortlink",
       "columns": {
         "id": {
           "name": "id",
@@ -107,7 +256,7 @@
         },
         "short_code": {
           "name": "short_code",
-          "type": "varchar(20)",
+          "type": "varchar(40)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -139,9 +288,9 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "short_link_user_id_users_id_fk": {
-          "name": "short_link_user_id_users_id_fk",
-          "tableFrom": "short_link",
+        "shortlink_user_id_users_id_fk": {
+          "name": "shortlink_user_id_users_id_fk",
+          "tableFrom": "shortlink",
           "tableTo": "users",
           "columnsFrom": [
             "user_id"
@@ -154,16 +303,16 @@
         }
       },
       "compositePrimaryKeys": {
-        "short_link_id": {
-          "name": "short_link_id",
+        "shortlink_id": {
+          "name": "shortlink_id",
           "columns": [
             "id"
           ]
         }
       },
       "uniqueConstraints": {
-        "short_link_short_code_unique": {
-          "name": "short_link_short_code_unique",
+        "shortlink_short_code_unique": {
+          "name": "shortlink_short_code_unique",
           "columns": [
             "short_code"
           ]
@@ -199,7 +348,14 @@
           "name": "password",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "avatar_url": {
+          "name": "avatar_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
           "autoincrement": false
         },
         "is_email_valid": {

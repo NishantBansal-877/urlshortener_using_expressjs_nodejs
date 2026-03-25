@@ -12,7 +12,7 @@ import {
 export const shortLinksTable = mysqlTable("shortlink", {
   id: int().autoincrement().primaryKey(),
   url: varchar({ length: 255 }).notNull(),
-  shortCode: varchar("short_code", { length: 20 }).notNull().unique(),
+  shortCode: varchar("short_code", { length: 40 }).notNull().unique(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
   userId: int("user_id")

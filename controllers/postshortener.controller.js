@@ -128,7 +128,9 @@ export const updateShortCode = async (req, res) => {
 
     res.redirect("/");
   } catch (error) {
-    return res.status(500).send("Interna server error");
+    console.log(error);
+
+    res.status(500).send("Interna server error");
   }
 };
 
