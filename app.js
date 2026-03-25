@@ -1,10 +1,12 @@
 import express, { urlencoded } from "express";
-import { shortenerRoutes } from "./routes/shortener.route.js";
-import { authRoutes } from "./routes/auth.routes.js";
-import cookieParser from "cookie-parser";
-import { verifyAuthentication } from "./middlewares/verify-auth-middleware.js";
 import session from "express-session";
 import flash from "connect-flash";
+import requestIp from "request-ip";
+import cookieParser from "cookie-parser";
+
+import { shortenerRoutes } from "./routes/shortener.route.js";
+import { authRoutes } from "./routes/auth.routes.js";
+import { verifyAuthentication } from "./middlewares/verify-auth-middleware.js";
 
 const app = express();
 
@@ -35,6 +37,7 @@ app.use(
 );
 
 app.use(flash());
+app.use(requestIp.mw());
 
 //this middleware should be used after cookieparser
 app.use(verifyAuthentication);

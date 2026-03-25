@@ -3,15 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <title>Login</title>
+    <link rel="stylesheet" href="style.css">
   </head>
   <style>
     body {
       font-family: Arial, sans-serif;
       background: #f4f6f8;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       height: 100vh;
+
     }
 
     .container {
@@ -21,6 +24,7 @@
       width: 300px;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
       text-align: center;
+  
     }
 
     input {
@@ -51,6 +55,9 @@
     }
   </style>
   <body>
+
+    <%- include("../partials/header")%>
+
     <div class="container">
       <h2>Login</h2>
 
@@ -71,6 +78,11 @@
 
         <button type="submit">Login</button>
       </form>
+      <div class="forgot-password-link">
+        <a href="/reset-password">Forgot Password</a>
+      </div>
     </div>
+
+    
   </body>
 </html>
