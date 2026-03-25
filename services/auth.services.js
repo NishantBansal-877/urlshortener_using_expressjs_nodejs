@@ -7,6 +7,8 @@ import fs from "fs/promises";
 import { and, eq, gte, lt, sql } from "drizzle-orm";
 import { db } from "../config/db.js";
 import {
+  oauthAccountsTable,
+  passwordResetTokensTable,
   sessionsTable,
   shortLinksTable,
   usersTable,
@@ -321,4 +323,117 @@ export const updateUserPassword = async ({ userId, newPassword }) => {
     .update(usersTable)
     .set({ password: newHashPassword })
     .where(eq(usersTable.id, userId));
+};
+
+export const findUserByEmail = async (email) => {
+  const [user] = await db
+    .select()
+    .from(usersTable)
+    .where(eq(usersTable.email, email));
+  return user;
+};
+
+export const createResetPasswordLink = async ({ userId }) => {
+  const randomToken = crypto.randomBytes(32).toString("hex");
+  const tokenHash = crypto
+    .createHash("sha256")
+    .update(randomToken)
+    .digest("hex");
+
+  await db
+    .delete(passwordResetTokensTable)
+    .where(eq(passwordResetTokensTable.userId, userId));
+  await db.insert(passwordResetTokensTable).values({ userId, tokenHash });
+
+  return `${process.env.FRONTEND_URL}/reset-passsword/${randomToken}`;
+};
+
+export const getResetPasswordToken = async (token) => {
+  const tokenHash = crypto.createHashash("sha256").update(token).digest("hex");
+  const [data] = await db
+    .select()
+    .from(passwordResetTokensTable)
+    .where(
+      and(
+        eq(passwordResetTokensTable.tokenHash, tokenHash),
+        gte(passwordResetTokensTable.expiresAt, sql`CURRENT_TIMESTAMP`),
+      ),
+    );
+
+  return data;
+};
+
+export const clearResetPasswordToken = async (userId) => {
+  return await db
+    .delete(passwordResetTokensTable)
+    .where(eq(passwordResetTokensTable.userId, userId));
+};
+
+export const getuserWithOauthId = async ({ provider, email }) => {
+  const [user] = await db
+    .select({
+      id: usersTable.id,
+      name: usersTable.name,
+      email: usersTable.email,
+      isEmailValid: usersTable.isEmailValid,
+      providerAccountId: oauthAccountsTable.providerAccountId,
+      provider: oauthAccountsTable.provider,
+    })
+    .from(usersTable)
+    .where(eq(usersTable.email, email))
+    .leftJoin(
+      oauthAccountsTable,
+      and(
+        eq(oauthAccountsTable.provider, provider),
+        eq(oauthAccountsTable.userId, usersTable.id),
+      ),
+    );
+
+  return user;
+};
+
+export const linkUserWithOauth = async ({
+  userId,
+  provider,
+  providerAccountId,
+}) => {
+  await db.insert(oauthAccountsTable).values({
+    userId,
+    provider,
+    providerAccountId,
+  });
+};
+
+export const createUserWithOauth = async ({
+  name,
+  email,
+  provider,
+  providerAccountId,
+}) => {
+  const user = await db.transaction(async (trx) => {
+    const [user] = await trx
+      .insert(usersTable)
+      .values({
+        email,
+        name,
+        password: "",
+        isEmailValid: true,
+      })
+      .$returningId();
+
+    await trx.insert(oauthAccountsTable).values({
+      provider,
+      providerAccountId,
+      userId: user.id,
+    });
+    return {
+      id: user.id,
+      name,
+      email,
+      isEmailValid: true,
+      provider,
+      providerAccountId,
+    };
+  });
+  return user;
 };

@@ -1,4 +1,12 @@
 import {
+  decodeIdToken,
+  generateCodeVerifier,
+  generateState,
+  GitHub,
+  Google,
+} from "arctic";
+import { sendEmail } from "../lib/resend-email.js";
+import {
   comparePassword,
   createUser,
   getUsersByEmail,
@@ -13,14 +21,25 @@ import {
   sendNewVerificationLink,
   updateUserByName,
   updateUserPassword,
+  findUserByEmail,
+  createResetPasswordLink,
+  clearResetPasswordToken,
+  linkUserWithOauth,
+  createUserWithOauth,
+  getuserWithOauthId,
 } from "../services/auth.services.js";
 import {
+  forgotPasswordSchema,
   loginUserSchema,
   registerUserSchema,
   verifyEmailSchema,
   verifyPasswordSchema,
+  verifyResetPasswordSchema,
   verifyUserSchema,
 } from "../validators/auth-validator.js";
+import { OAUTH_EXCHANGE_EXPIRY } from "../config/constants.js";
+import { google } from "../lib/oauth/google.js";
+import { github } from "../lib/oauth/github.js";
 
 export const getRegisterPage = (req, res) => {
   if (req.user) return res.redirect("/");
@@ -34,7 +53,6 @@ export const getLoginPage = (req, res) => {
 
 export const postRegister = async (req, res) => {
   if (req.user) return res.redirect("/");
-  //   console.log(req.body);
 
   const { data, error } = registerUserSchema.safeParse(req.body);
 
@@ -80,6 +98,14 @@ export const postLogin = async (req, res) => {
 
   if (!user) {
     req.flash("errors", "Invalid Email or Password");
+    return res.redirect("/login");
+  }
+
+  if (!user.password) {
+    req.flash(
+      "errors",
+      "You have created account using social login. Please login with your social account",
+    );
     return res.redirect("/login");
   }
 
@@ -171,7 +197,6 @@ export const verifyEmailToken = async (req, res) => {
   //with joins
   const [token] = await findVerificationEmailToken(data);
 
-  // console.log("VerifyEmailToken - token:", token);
   if (!token) res.send("Verification link invalid or expired!");
   await verifyUserEmailAndUpdates(token.email);
   await clearVerifyEmailTokens(token.email).catch(console.error);
@@ -184,10 +209,11 @@ export const getEditProfilePage = async (req, res) => {
   const user = await findUserById(req.user.id);
 
   if (!user) return res.status(404).send("User not found");
-  console.log("called");
+
   return res.render("auth/edit-profile", {
     name: user.name,
-    errors: req.flash("erros"),
+    errors: req.flash("errors"),
+    avatarUrl: null,
   });
 };
 
@@ -232,7 +258,7 @@ export const postChangePassword = async (req, res) => {
 
   if (!isPasswordValid) {
     req.flash("errors", "Current Password that you have entered is invalid");
-    return res.redirect("/auth/change-password");
+    return res.redirect("/auth/forgot-password");
   }
 
   await updateUserPassword({ userId: user.id, newPassword });
@@ -245,4 +271,180 @@ export const getResetPasswordPage = async (req, res) => {
     formSubmitted: req.flash("formSubmitted")[0],
     errors: req.flash("errors"),
   });
+};
+
+export const postForgotPassword = async (req, res) => {
+  const { data, error } = forgotPasswordSchema.safeParse(req.body);
+
+  if (error) {
+    const errorMessages = error.errors.map((err) => err.message);
+    req.flash("errors", errorMessages[0]);
+    return res.redirect("/reset-password");
+  }
+
+  const user = await findUserByEmail(data.email);
+  if (user) {
+    const resetPasswordLink = await createResetPasswordLink({
+      userId: user.id,
+    });
+
+    const html = await getHtmlFromMjmlTemplate("reset-password-email", {
+      name: user.name,
+      link: resetPasswordLink,
+    });
+
+    sendEmail({
+      to: user.email,
+      subject: "RESET YOUR PASSWORD",
+      html,
+    });
+  }
+  req.flash("formSUbmitted", true);
+  return res.redirect("/reset-password");
+};
+
+export const getResetPasswordTokenPage = async (req, res) => {
+  const { token } = req.params;
+  const passwordResetData = await getResetPasswordToken(token);
+  if (!passwordResetData) return res.render("auth/wrond-reset-password-token");
+
+  return res.render("auth/reset-password", {
+    formSubmitted: req.flash("formSubmitted")[0],
+    errors: req.flash("errors"),
+    token,
+  });
+};
+
+export const postResetPasswordToken = async (req, res) => {
+  const { token } = req.params;
+  const passwordResetData = await getResetPasswordToken(token);
+  if (!passwordResetData) {
+    req.flash("errors", "Password Token is not matching");
+    return res.render("auth/wrond-reset-password-token");
+  }
+
+  const { data, error } = verifyResetPasswordSchema.safeParse(req.body);
+
+  if (error) {
+    const errorMessages = error.errors.map((err) => err.message);
+    req.flash("errors", errorMessages[0]);
+    return res.redirect(`/reset-password/${token}`);
+  }
+
+  const { newPassword } = data;
+
+  const user = await findUserById(passwordResetData.userId);
+
+  await clearResetPasswordToken(user.id);
+  await updateUserPassword({ userId: user.id, newPassword });
+
+  return res.redirect("/login");
+};
+
+export const getGoogleLoginPage = async (req, res) => {
+  if (req.user) return res.redirect("/");
+
+  const state = generateState();
+  const codeVerifier = generateCodeVerifier();
+
+  const url = google.createAuthorizationURL(state, codeVerifier, [
+    "openid",
+    "profile",
+    "email",
+  ]);
+
+  const cookieConfig = {
+    httpOnly: true,
+    secure: true,
+    maxAge: OAUTH_EXCHANGE_EXPIRY,
+    sameSite: "lax",
+    //this is such that when google redirects to our website cookies are maintained
+  };
+
+  res.cookie("google_oauth_state", state, cookieConfig);
+  res.cookie("google_code_verifier", codeVerifier, cookieConfig);
+
+  res.redirect(url.toString());
+};
+
+export const getGoogleLoginCallback = async (req, res) => {
+  const { code, state } = req.query;
+
+  const {
+    google_oauth_state: storedState,
+    google_code_verifier: codeVerifier,
+  } = req.cookies;
+
+  if (
+    !code ||
+    !state ||
+    !storedState ||
+    !codeVerifier ||
+    state !== storedState
+  ) {
+    req.flash(
+      "errors",
+      "Couldn't login with Google becuse of invalid login attempt. Please try again!",
+    );
+    return res.redirect("/login");
+  }
+  let tokens;
+  try {
+    tokens = await google.validateAuthorizationCode(code, codeVerifier);
+  } catch (error) {
+    console.log("err", error);
+    req.flash(
+      "errors",
+      "Couldn't login with Google becuse of invalid login attempt. Please try again!",
+    );
+    return res.redirect("/login");
+  }
+
+  const claims = decodeIdToken(tokens.idToken());
+  const { sub: googleUserId, name, email } = claims;
+
+  let user = await getuserWithOauthId({
+    provider: "google",
+    email,
+  });
+
+  if (user && !user.providerAccountId) {
+    await linkUserWithOauth({
+      userId: user.id,
+      provider: "google",
+      providerAccountId: googleUserId,
+    });
+  }
+
+  if (!user) {
+    user = await createUserWithOauth({
+      name,
+      email,
+      provider: "google",
+      providerAccountId: googleUserId,
+    });
+  }
+  await authenticateUser({ req, res, user, name, email });
+
+  res.redirect("/");
+};
+
+export const getGithubLoginPage = async (req, res) => {
+  if (req.user) return res.redirect("/");
+
+  const state = generateState();
+
+  const url = github.createAuthorizationURL(state, ["user:email"]);
+
+  const cookieConfig = {
+    httpOnly: true,
+    secure: true,
+    maxAge: OAUTH_EXCHANGE_EXPIRY,
+    sameSite: "lax",
+    //this is such that when google redirects to our website cookies are maintained
+  };
+
+  res.cookie("github_oauth_state", state, cookieConfig);
+
+  res.redirect(url.toString());
 };

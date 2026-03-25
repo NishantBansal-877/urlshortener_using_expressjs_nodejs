@@ -27,7 +27,6 @@ app.use(
     secret: "mysecret",
     resave: true,
     saveUninitialized: false,
-    name: "session_id",
     cookie: {
       secure: false,
       httpOnly: true,

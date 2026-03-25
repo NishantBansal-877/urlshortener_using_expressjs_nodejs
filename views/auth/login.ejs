@@ -2,87 +2,104 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Login</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login Page</title>
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css">
   </head>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-
-    }
-
-    .container {
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      width: 300px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      text-align: center;
-  
-    }
-
-    input {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-
-    button {
-      width: 100%;
-      padding: 10px;
-      background: #007bff;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #0056b3;
-    }
-
-    .error {
-      color: red;
-      margin-top: 10px;
-    }
-  </style>
   <body>
+    <%- include('../partials/header') %>
 
-    <%- include("../partials/header")%>
+    <div class="main">
+      <!-- Sign in Form -->
+      <section class="sign-in">
+        <div class="container">
+          <div class="signin-content">
+            <div class="signin-image">
+              <figure>
+                <img src="images/signin-image.jpg" alt="sign in image" />
+              </figure>
+              <a href="/register" class="signup-image-link"
+                >Create an account</a
+              >
+            </div>
 
-    <div class="container">
-      <h2>Login</h2>
+            <div class="signin-form">
+              <h2 class="form-title">Sign in</h2>
+              <form
+                action="/login"
+                method="POST"
+                class="register-form"
+                id="login-form"
+              >
+                <div class="form-group">
+                  <label for="email">
+                    <i class="zmdi zmdi-email"></i>
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    id="email"
+                    placeholder="Enter Your Email"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="your_pass"><i class="zmdi zmdi-lock"></i></label>
+                  <input
+                    type="password"
+                    name="password"
+                    id="your_pass"
+                    placeholder="Password"
+                  />
+                </div>
 
-      <form action="/login" method="POST">
-        <input type="email" name="email" placeholder="Enter Email" required />
+                <% if ((errors && errors.length > 0)) { %> <%
+                errors.forEach((error) => { %>
+                <p class="flash-error"><%= error %></p>
+                <% }); %> <% } %>
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Enter Password"
-          required
-        />
-           <%  if(errors && errors.length> 0) { %>
-        <% errors.forEach((error)=>{%>
-          <p class = "flash-error"><%= error %></p>
-          <% });%>
-          <% } %>
+                <div class="form-group form-button">
+                  <input
+                    type="submit"
+                    name="signin"
+                    id="signin"
+                    class="form-submit"
+                    value="Log in"
+                  />
+                </div>
+              </form>
 
-        <button type="submit">Login</button>
-      </form>
-      <div class="forgot-password-link">
-        <a href="/reset-password">Forgot Password</a>
-      </div>
+              <!-- Add this forgot password link -->
+              <div class="forgot-password-link">
+                <a href="/reset-password">Forgot password?</a>
+              </div>
+
+              <div class="social-login">
+                <span class="social-label">Or login with</span>
+                <ul class="socials">
+                  <li>
+                    <a href="#">
+                      <i class="zmdi zmdi-facebook"></i>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="/github">
+                      <i class="zmdi zmdi-github"></i>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="/google">
+                      <i class="zmdi zmdi-google"></i>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
 
-    
+    <%- include('../partials/footer') %>
   </body>
 </html>
